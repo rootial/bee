@@ -50,34 +50,32 @@ type Receipt struct {
 }
 
 type PushSync struct {
-	streamer      p2p.StreamerDisconnecter
-	storer        storage.Putter
-	peerSuggester topology.ClosestPeerer
-	tagger        *tags.Tags
-	unwrap        func(swarm.Chunk)
-	logger        logging.Logger
-	accounting    accounting.Interface
-	pricer        pricer.Interface
-	metrics       metrics
-	tracer        *tracing.Tracer
-	signer        crypto.Signer
+	streamer   p2p.StreamerDisconnecter
+	storer     storage.Putter
+	tagger     *tags.Tags
+	unwrap     func(swarm.Chunk)
+	logger     logging.Logger
+	accounting accounting.Interface
+	pricer     pricer.Interface
+	metrics    metrics
+	tracer     *tracing.Tracer
+	signer     crypto.Signer
 }
 
 var timeToLive = 5 * time.Second // request time to live
 
-func New(streamer p2p.StreamerDisconnecter, storer storage.Putter, closestPeerer topology.ClosestPeerer, tagger *tags.Tags, unwrap func(swarm.Chunk), logger logging.Logger, accounting accounting.Interface, pricer pricer.Interface, signer crypto.Signer, tracer *tracing.Tracer) *PushSync {
+func New(streamer p2p.StreamerDisconnecter, storer storage.Putter, tagger *tags.Tags, unwrap func(swarm.Chunk), logger logging.Logger, accounting accounting.Interface, pricer pricer.Interface, signer crypto.Signer, tracer *tracing.Tracer) *PushSync {
 	ps := &PushSync{
-		streamer:      streamer,
-		storer:        storer,
-		peerSuggester: closestPeerer,
-		tagger:        tagger,
-		unwrap:        unwrap,
-		logger:        logger,
-		accounting:    accounting,
-		pricer:        pricer,
-		metrics:       newMetrics(),
-		tracer:        tracer,
-		signer:        signer,
+		streamer:   streamer,
+		storer:     storer,
+		tagger:     tagger,
+		unwrap:     unwrap,
+		logger:     logger,
+		accounting: accounting,
+		pricer:     pricer,
+		metrics:    newMetrics(),
+		tracer:     tracer,
+		signer:     signer,
 	}
 	return ps
 }
@@ -212,9 +210,9 @@ func (ps *PushSync) pushToClosest(ctx context.Context, ch swarm.Chunk) (rr *pb.R
 		defersFn()
 
 		// find next closest peer
-		peer, err := ps.peerSuggester.ClosestPeer(ch.Address(), skipPeers...)
+		peer, err := ps.pricer.CheapestPeer(ch.Address(), skipPeers, false)
 		if err != nil {
-			// ClosestPeer can return ErrNotFound in case we are not connected to any peers
+			// CheapestPeer can return ErrNotFound in case we are not connected to any peers
 			// in which case we should return immediately.
 			// if ErrWantSelf is returned, it means we are the closest peer.
 			return nil, fmt.Errorf("closest peer: %w", err)

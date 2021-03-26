@@ -406,7 +406,7 @@ func NewBee(addr string, swarmAddress swarm.Address, publicKey ecdsa.PublicKey, 
 	}
 	b.localstoreCloser = storer
 
-	retrieve := retrieval.New(swarmAddress, storer, p2ps, kad, logger, acc, pricer, tracer)
+	retrieve := retrieval.New(swarmAddress, storer, p2ps, logger, acc, pricer, tracer)
 	tagService := tags.NewTags(stateStore, logger)
 	b.tagsCloser = tagService
 
@@ -428,7 +428,7 @@ func NewBee(addr string, swarmAddress swarm.Address, publicKey ecdsa.PublicKey, 
 
 	traversalService := traversal.NewService(ns)
 
-	pushSyncProtocol := pushsync.New(p2ps, storer, kad, tagService, pssService.TryUnwrap, logger, acc, pricer, signer, tracer)
+	pushSyncProtocol := pushsync.New(p2ps, storer, tagService, pssService.TryUnwrap, logger, acc, pricer, signer, tracer)
 
 	// set the pushSyncer in the PSS
 	pssService.SetPushSyncer(pushSyncProtocol)
