@@ -10,13 +10,13 @@ import (
 	"reflect"
 	"testing"
 
-	mockkad "github.com/ethersphere/bee/pkg/kademlia/mock"
 	"github.com/ethersphere/bee/pkg/logging"
 	"github.com/ethersphere/bee/pkg/p2p"
 	"github.com/ethersphere/bee/pkg/pricer"
 	"github.com/ethersphere/bee/pkg/pricer/headerutils"
 	"github.com/ethersphere/bee/pkg/statestore/mock"
 	"github.com/ethersphere/bee/pkg/swarm"
+	mockkad "github.com/ethersphere/bee/pkg/topology/kademlia/mock"
 )
 
 func TestPriceTableDefaultTables(t *testing.T) {
