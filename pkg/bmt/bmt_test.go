@@ -37,6 +37,7 @@ const (
 var (
 	testSegmentCounts = []int{1, 2, 3, 4, 5, 8, 9, 15, 16, 17, 32, 37, 42, 53, 63, 64, 65, 111, 127, 128}
 	testHasher        = sha3.NewLegacyKeccak256
+	seed              = time.Now().Unix()
 )
 
 // calculates the Keccak256 SHA3 hash of the data
@@ -94,10 +95,7 @@ func TestHasherEmptyData(t *testing.T) {
 // tests sequential write with entire max size written in one go
 func TestSyncHasherCorrectness(t *testing.T) {
 	data := make([]byte, BufferSize)
-	_, err := io.ReadFull(crand.Reader, data)
-	if err != nil {
-		t.Fatal(err)
-	}
+	setRandomBytes(t, data, seed)
 	size := testHasher().Size()
 
 	for _, count := range testSegmentCounts {
@@ -110,9 +108,9 @@ func TestSyncHasherCorrectness(t *testing.T) {
 			defer pool.Put(h)
 			for n := 0; n <= max; n += incr {
 				incr = 1 + rand.Intn(5)
-				err = testHasherCorrectness(h, testHasher, data, n, count)
+				err := testHasherCorrectness(h, testHasher, data, n, count)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatal(fmt.Errorf("seed %d: %w", seed, err))
 				}
 			}
 		})
@@ -137,14 +135,11 @@ func testHasherReuse(poolsize int, t *testing.T) {
 
 	for i := 0; i < 100; i++ {
 		data := make([]byte, BufferSize)
-		_, err := io.ReadFull(crand.Reader, data)
-		if err != nil {
-			t.Fatal(err)
-		}
+		setRandomBytes(t, data, int64(i))
 		n := rand.Intn(h.Size())
-		err = testHasherCorrectness(h, testHasher, data, n, testSegmentCount)
+		err := testHasherCorrectness(h, testHasher, data, n, testSegmentCount)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatal(fmt.Errorf("seed %d: %w", i, err))
 		}
 	}
 }
@@ -293,5 +288,14 @@ func TestUseSyncAsOrdinaryHasher(t *testing.T) {
 	}
 	if !bytes.Equal(expHash, resHash) {
 		t.Fatalf("normalhash; expected %x, got %x", expHash, resHash)
+	}
+}
+
+func setRandomBytes(t *testing.T, data []byte, seed int64) {
+	s := rand.NewSource(seed)
+	r := rand.New(s)
+	_, err := io.ReadFull(r, data)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

@@ -19,15 +19,9 @@ const (
 type Hash interface {
 	hash.Hash
 
-	// SetSpan sets the length prefix of BMT hash.
-	SetSpan(int64)
-
 	// SetSpanBytes sets the length prefix of BMT hash in byte form.
 	SetSpanBytes([]byte)
 
 	// Capacity returns the maximum amount of bytes that will be processed by the implementation.
 	Capacity() int
-
-	// WriteSection writes to a specific section of the data to be hashed.
-	WriteSection(idx int, data []byte)
 }

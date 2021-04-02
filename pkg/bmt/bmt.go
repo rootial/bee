@@ -35,23 +35,9 @@ type Hasher struct {
 }
 
 // Capacity returns the maximum amount of bytes that will be processed by this hasher implementation.
+// since BMT assumes a balanced binary tree, capacity it is always a power of 2
 func (h *Hasher) Capacity() int {
 	return h.maxSize
-}
-
-// writeSection allows asynchronous writes of the base segments
-func (h *Hasher) WriteSection(idx int, data []byte) {
-	// secsize := 2 * h.segmentCount
-	// l := len(data)
-	// if secsize < l {
-	// 	l = secsize
-	// }
-	// copy(h.bmt.buffer[idx*secsize:], data[:l])
-	// if h.pos > idx {
-	// 	go h.processSection(idx, false)
-	// } else {
-	// 	h.pos = idx
-	// }
 }
 
 // SetSpan sets the span length value prefix in numeric form for the current hash operation.
